@@ -1,110 +1,163 @@
-# Python program for implementation
-# of Ford Fulkerson algorithm
-# from collections import defaultdict
 
-# This class represents a directed graph
-# using adjacency matrix representation
-class Graph:
+# Python3 program to implement
+# the above approach
+from sys import maxsize
+from typing import List
 
-    def __init__(self, graph):
-        self.graph = graph  # residual graph
-        self.row = len(graph)
+INF = float("inf")
 
-    def BFS(self, s, t, parent):
+class MinCostMaxFlow(object):
+    def __init__(self, capacities, cost) -> None:
+        # Stores the self.found edges
 
-        # Mark all the vertices as not visited
-        visited = [False]*(self.row)
+        # Stores the number of nodes
 
-        # Create a queue for BFS
-        queue = []
+        # Stores the capacity
+        # of each edge
+        self.capacities = capacities
 
-        # Mark the source node as visited and enqueue it
-        queue.append(s)
-        visited[s] = True
+        # Stores the self.cost per
+        # unit self.flow of each edge
+        self.cost = cost
 
-        # Standard BFS Loop
-        while queue:
-
-            # Dequeue a vertex from queue and print it
-            u = queue.pop(0)
-
-            # Get all adjacent vertices of the dequeued vertex u
-            # If a adjacent has not been visited, then mark it
-            # visited and enqueue it
-            for ind, val in enumerate(self.graph[u]):
-                if visited[ind] == False and val > 0:
-                    # If we find a connection to the sink node,
-                    # then there is no point in BFS anymore
-                    # We just have to set its parent and can return true
-                    queue.append(ind)
-                    visited[ind] = True
-                    parent[ind] = u
-                    if ind == t:
-                        return True
-
-        # We didn't reach sink in BFS starting
-        # from source, so return false
-        return False
-
-    # Returns the maximum flow from s to t in the given graph
-
-    def FordFulkerson(self, source, sink):
-
-        # This array is filled by BFS and to store path
-        parent = [-1]*(self.row)
-
-        max_flow = 0  # There is no flow initially
-
-        # Augment the flow while there is path from source to sink
-        while self.BFS(source, sink, parent):
-
-            # Find minimum residual capacity of the edges along the
-            # path filled by BFS. Or we can say find the maximum flow
-            # through the path found.
-            path_flow = float("Inf")
-            s = sink
-            while(s != source):
-                path_flow = min(path_flow, self.graph[parent[s]][s])
-                s = parent[s]
-
-            # Add path flow to overall flow
-            max_flow += path_flow
-
-            # update residual capacities of the edges and reverse edges
-            # along the path
-            v = sink
-            while(v != source):
-                u = parent[v]
-                self.graph[u][v] -= path_flow
-                self.graph[v][u] += path_flow
-                v = parent[v]
-        print(self.graph)
-        return max_flow
+        # Stores the distance from each node
+        # and picked edges for each node
+        self.N = len(self.capacities)
+        self.found = [False for _ in range(self.N)]
+        self.flow = [[0 for _ in range(self.N)]
+                for _ in range(self.N)]
+        self.dist = [INF for _ in range(self.N + 1)]
+        self.dad = [0 for _ in range(self.N)]
+        self.pi = [0 for _ in range(self.N)]
 
 
-# Create a graph given in the above diagram
 
-# graph = [[0, 16, 13, 0, 0, 0],
-#         [0, 0, 10, 12, 0, 0],
-#         [0, 4, 0, 0, 14, 0],
-#         [0, 0, 9, 0, 0, 20],
-#         [0, 0, 0, 7, 0, 4],
-#         [0, 0, 0, 0, 0, 0]]
+    # Function to check if it is possible to
+    # have a self.flow from the src to sink
+    def search(self, src: int, sink: int) -> bool:
+
+        # Initialise self.found[] to false
+        self.found = [False for _ in range(self.N)]
+
+        # Initialise the self.dist[] to INF
+        self.dist = [INF for _ in range(self.N + 1)]
+
+        # Distance from the source node
+        self.dist[src] = 0
+
+        # Iterate until src reaches N
+        while (src != self.N):
+            best = self.N
+            self.found[src] = True
+
+            for k in range(self.N):
+
+                # If already self.found
+                if (self.found[k]):
+                    continue
+
+                # Evaluate while self.flow
+                # is still in supply
+                if (self.flow[k][src] != 0):
+
+                    # Obtain the total value
+                    val = (self.dist[src] + self.pi[src] -
+                            self.pi[k] - self.cost[k][src])
+
+                    # If self.dist[k] is > minimum value
+                    if (self.dist[k] > val):
+
+                        # Update
+                        self.dist[k] = val
+                        self.dad[k] = src
+
+                if (self.flow[src][k] < self.capacities[src][k]):
+                    val = (self.dist[src] + self.pi[src] -
+                            self.pi[k] + self.cost[src][k])
+
+                    # If self.dist[k] is > minimum value
+                    if (self.dist[k] > val):
+
+                        # Update
+                        self.dist[k] = val
+                        self.dad[k] = src
+
+                if (self.dist[k] < self.dist[best]):
+                    best = k
+
+            # Update src to best for
+            # next iteration
+            src = best
+
+        for k in range(self.N):
+            self.pi[k] = min(self.pi[k] + self.dist[k], INF)
+
+        # Return the value obtained at sink
+        return self.found[sink]
+
+    # Function to obtain the maximum Flow
+    def getMaxFlow(self, src: int, sink: int) -> List[int]:
+
+        # global self.capacities, self.cost, self.found, self.dist, self.pi, N, self.flow, self.dad
 
 
-start_nodes = [0, 0, 0, 1, 1, 2, 2, 3, 3]
-end_nodes = [1, 2, 3, 2, 4, 3, 4, 2, 4]
-capacities = [20, 30, 10, 40, 30, 10, 20, 5, 20]
-graph = [
-    [0 for x in range(len(start_nodes))] for z in range(len(start_nodes))
-]
 
-for i in range(len(start_nodes)):
-    graph[start_nodes[i]][end_nodes[i]] = capacities[i]
+        totflow = 0
+        totcost = 0
 
-g = Graph(graph)
+        # If a path exist from src to sink
+        while (self.search(src, sink)):
 
-source = 0
-sink = 4
+            # Set the default amount
+            amt = INF
+            x = sink
 
-print("The maximum possible flow is %d " % g.FordFulkerson(source, sink))
+            while x != src:
+                amt = min(
+                    amt, self.flow[x][self.dad[x]] if
+                    (self.flow[x][self.dad[x]] != 0) else
+                    self.capacities[self.dad[x]][x] - self.flow[self.dad[x]][x])
+                x = self.dad[x]
+
+            x = sink
+
+            while x != src:
+                if (self.flow[x][self.dad[x]] != 0):
+                    self.flow[x][self.dad[x]] -= amt
+                    totcost -= amt * self.cost[x][self.dad[x]]
+
+                else:
+                    self.flow[self.dad[x]][x] += amt
+                    totcost += amt * self.cost[self.dad[x]][x]
+
+                x = self.dad[x]
+
+            totflow += amt
+
+
+        # Return pair total self.cost and sink
+        return [totflow, totcost]
+
+# Driver Code
+if __name__ == "__main__":
+
+    s = 0
+    t = 4
+
+    capacities = [ [ 0, 15, 8, 0, 0 ],
+            [ 0, 0, 20, 4, 10 ],
+            [ 0, 0, 0, 15, 4 ],
+            [ 0, 0, 0, 0, 20 ],
+            [ 0, 0, 5, 0, 0 ] ]
+
+    cost = [ [ 0, 4, 4, 0, 0 ],
+            [ 0, 0, 2, 2, 6 ],
+            [ 0, 0, 0, 1, 3 ],
+            [ 0, 0, 0, 0, 2 ],
+            [ 0, 0, 3, 0, 0 ] ]
+
+    minCostMaxFlow = MinCostMaxFlow(capacities, cost)
+
+    flow, cost = minCostMaxFlow.getMaxFlow(s, t)
+
+    print("Max flow : {}, Min cost : {}".format(flow, cost))
