@@ -1,7 +1,6 @@
 
 # Python3 program to implement
 # the above approach
-from sys import maxsize
 from typing import List
 
 INF = float("inf")
@@ -25,15 +24,14 @@ class MinCostMaxFlow(object):
         self.N = len(self.capacities)
         self.found = [False for _ in range(self.N)]
         self.flow = [[0 for _ in range(self.N)]
-                for _ in range(self.N)]
+                     for _ in range(self.N)]
         self.dist = [INF for _ in range(self.N + 1)]
-        self.dad = [0 for _ in range(self.N)]
+        self.parent = [0 for _ in range(self.N)]
         self.pi = [0 for _ in range(self.N)]
-
-
 
     # Function to check if it is possible to
     # have a self.flow from the src to sink
+
     def search(self, src: int, sink: int) -> bool:
 
         # Initialise self.found[] to false
@@ -62,25 +60,25 @@ class MinCostMaxFlow(object):
 
                     # Obtain the total value
                     val = (self.dist[src] + self.pi[src] -
-                            self.pi[k] - self.cost[k][src])
+                           self.pi[k] - self.cost[k][src])
 
                     # If self.dist[k] is > minimum value
                     if (self.dist[k] > val):
 
                         # Update
                         self.dist[k] = val
-                        self.dad[k] = src
+                        self.parent[k] = src
 
                 if (self.flow[src][k] < self.capacities[src][k]):
                     val = (self.dist[src] + self.pi[src] -
-                            self.pi[k] + self.cost[src][k])
+                           self.pi[k] + self.cost[src][k])
 
                     # If self.dist[k] is > minimum value
                     if (self.dist[k] > val):
 
                         # Update
                         self.dist[k] = val
-                        self.dad[k] = src
+                        self.parent[k] = src
 
                 if (self.dist[k] < self.dist[best]):
                     best = k
@@ -100,8 +98,6 @@ class MinCostMaxFlow(object):
 
         # global self.capacities, self.cost, self.found, self.dist, self.pi, N, self.flow, self.dad
 
-
-
         totflow = 0
         totcost = 0
 
@@ -109,31 +105,32 @@ class MinCostMaxFlow(object):
         while (self.search(src, sink)):
 
             # Set the default amount
-            amt = INF
-            x = sink
+            amount = INF
+            dst = sink
 
-            while x != src:
-                amt = min(
-                    amt, self.flow[x][self.dad[x]] if
-                    (self.flow[x][self.dad[x]] != 0) else
-                    self.capacities[self.dad[x]][x] - self.flow[self.dad[x]][x])
-                x = self.dad[x]
+            while dst != src:
+                amount = min(
+                    amount, self.flow[dst][self.parent[dst]] if
+                    (self.flow[dst][self.parent[dst]] != 0) else
+                    self.capacities[self.parent[dst]][dst] - self.flow[self.parent[dst]][dst])
+                dst = self.parent[dst]
 
-            x = sink
+            dst = sink
 
-            while x != src:
-                if (self.flow[x][self.dad[x]] != 0):
-                    self.flow[x][self.dad[x]] -= amt
-                    totcost -= amt * self.cost[x][self.dad[x]]
+            while dst != src:
+                if (self.flow[dst][self.parent[dst]] != 0):
+                    self.flow[dst][self.parent[dst]] -= amount
+                    totcost -= amount * \
+                        self.cost[dst][self.parent[dst]]
 
                 else:
-                    self.flow[self.dad[x]][x] += amt
-                    totcost += amt * self.cost[self.dad[x]][x]
+                    self.flow[self.parent[dst]][dst] += amount
+                    totcost += amount * \
+                        self.cost[self.parent[dst]][dst]
 
-                x = self.dad[x]
+                dst = self.parent[dst]
 
-            totflow += amt
-
+            totflow += amount
 
         # Return pair total self.cost and sink
         return [totflow, totcost]
@@ -144,17 +141,17 @@ if __name__ == "__main__":
     s = 0
     t = 4
 
-    capacities = [ [ 0, 15, 8, 0, 0 ],
-            [ 0, 0, 20, 4, 10 ],
-            [ 0, 0, 0, 15, 4 ],
-            [ 0, 0, 0, 0, 20 ],
-            [ 0, 0, 5, 0, 0 ] ]
+    capacities = [[0, 15, 8, 0, 0],
+                  [0, 0, 20, 4, 10],
+                  [0, 0, 0, 15, 4],
+                  [0, 0, 0, 0, 20],
+                  [0, 0, 5, 0, 0]]
 
-    cost = [ [ 0, 4, 4, 0, 0 ],
-            [ 0, 0, 2, 2, 6 ],
-            [ 0, 0, 0, 1, 3 ],
-            [ 0, 0, 0, 0, 2 ],
-            [ 0, 0, 3, 0, 0 ] ]
+    cost = [[0, 4, 4, 0, 0],
+            [0, 0, 2, 2, 6],
+            [0, 0, 0, 1, 3],
+            [0, 0, 0, 0, 2],
+            [0, 0, 3, 0, 0]]
 
     minCostMaxFlow = MinCostMaxFlow(capacities, cost)
 
