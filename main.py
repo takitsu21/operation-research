@@ -89,7 +89,7 @@ class MinCostMaxFlow(object):
 
         for k in range(self.N):
             self.pi[k] = min(self.pi[k] + self.dist[k], INF)
-
+        print(self.parent, self.dist)
         # Return the value obtained at sink
         return self.found[sink]
 
