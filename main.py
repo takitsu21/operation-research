@@ -103,7 +103,7 @@ class MinCostMaxFlow(object):
 
         # If a path exist from src to sink
         while (self.search(src, sink)):
-
+            print(src, sink)
             # Set the default amount
             amount = INF
             dst = sink
