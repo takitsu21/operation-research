@@ -1,18 +1,13 @@
 
-
-import enum
-from tracemalloc import start
-
-
-class MaxFlow:
+class MaxFlow(object):
 
     def __init__(self, capacities):
-        self.graph = capacities
-        self.row = len(capacities)
-        self.parent = [0] * self.row
+        self.capacities = capacities
+        self.N = len(capacities)
+        self.parent = [0] * self.N
 
     def BFS(self, src, dst):
-        visited = [False] * self.row
+        visited = [False] * self.N
 
         queue = []
 
@@ -22,12 +17,12 @@ class MaxFlow:
         while queue:
 
             u = queue.pop(0)
-            for ind, val in enumerate(self.graph[u]):
-                if visited[ind] == False and val > 0:
-                    queue.append(ind)
-                    visited[ind] = True
-                    self.parent[ind] = u
-                    if ind == dst:
+            for i, val in enumerate(self.capacities[u]):
+                if visited[i] == False and val > 0:
+                    queue.append(i)
+                    visited[i] = True
+                    self.parent[i] = u
+                    if i == dst:
                         return True
         return False
 
@@ -38,7 +33,7 @@ class MaxFlow:
             path_flow = float("Inf")
             s = dst
             while(s != src):
-                path_flow = min(path_flow, self.graph[self.parent[s]][s])
+                path_flow = min(path_flow, self.capacities[self.parent[s]][s])
                 s = self.parent[s]
 
             max_flow += path_flow
@@ -46,24 +41,11 @@ class MaxFlow:
             v = dst
             while(v != src):
                 u = self.parent[v]
-                self.graph[u][v] -= path_flow
-                self.graph[v][u] += path_flow
+                self.capacities[u][v] -= path_flow
+                self.capacities[v][u] += path_flow
                 v = self.parent[v]
 
         return max_flow
-
-
-class Edge:
-    def __init__(self, u, v, cost, capacity) -> None:
-        self.u = u
-        self.v = v
-        self.cost = cost
-        self.capacity = capacity
-        self.distance = float("inf")
-
-    def __repr__(self) -> str:
-        return f"<u: {self.u} v: {self.v} cost: {self.cost} capacity: {self.capacity}>"
-
 
 class MinCostMaxFlow(object):
     def __init__(self, capacities, cost) -> None:
@@ -134,7 +116,7 @@ class MinCostMaxFlow(object):
         shortest_path.insert(0, s)
         return shortest_path
 
-    def minCost(self, src, dst):
+    def minCostMaxFlow(self, src, dst):
         max_flow = 0
         min_cost = 0
         saturated_flow_mc = []
@@ -170,7 +152,7 @@ class MinCostMaxFlow(object):
         min_cut = []
 
         for u, v in saturated_flow_mc:
-            if not self.BFS(src, v) and self.BFS(src, u):
+            if self.BFS(src, u) and not self.BFS(src, v):
                 min_cut.append([u, v])
 
         return max_flow, min_cost, min_cut
@@ -178,12 +160,12 @@ class MinCostMaxFlow(object):
 
 if __name__ == "__main__":
 
-    # start_nodes = [0, 0, 1, 2, 3, 1, 2, 3, 4, 5]
-    # end_nodes = [1, 3, 2, 3, 2, 4, 4, 5, 6, 6]
-    # capacities = [16, 13, 5, 5, 10, 10, 8, 15, 25, 6]
-    # costs = [6, 4, 5, 6, 6, 5, 3, 5, 7, 7]
-    # s = 0
-    # t = 6
+    start_nodes = [0, 0, 1, 2, 3, 1, 2, 3, 4, 5]
+    end_nodes = [1, 3, 2, 3, 2, 4, 4, 5, 6, 6]
+    capacities = [16, 13, 5, 5, 10, 10, 8, 15, 25, 6]
+    costs = [6, 4, 5, 6, 6, 5, 3, 5, 7, 7]
+    s = 0
+    t = 6
     # start_nodes = [ 0, 0,  1, 1,  1,  2, 2,  3, 4]
     # end_nodes   = [ 1, 2,  2, 3,  4,  3, 4,  4, 2]
     # capacities  = [15, 8, 20, 4, 10, 15, 4, 20, 5]
@@ -216,12 +198,12 @@ if __name__ == "__main__":
     # s = 0
     # t = 3
 
-    start_nodes = [0, 0, 2]
-    end_nodes = [1, 2, 3]
-    capacities = [2, 2, 2]
-    costs = [2, 2, 2]
-    s=0
-    t=3
+    # start_nodes = [0, 0, 2]
+    # end_nodes = [1, 2, 3]
+    # capacities = [2, 2, 2]
+    # costs = [2, 2, 2]
+    # s=0
+    # t=3
 
     # start_nodes = [0, 0, 1, 2, 3, 1, 2, 3, 4, 5]
     # end_nodes   = [1, 3, 2, 3, 2, 4, 4, 5, 6, 6]
@@ -277,11 +259,10 @@ if __name__ == "__main__":
         [0 for x in range(base_nb_nodes)] for z in range(base_nb_nodes)
     ]
 
-
     for i in range(nb_nodes):
         graph_capacities[start_nodes[i]][end_nodes[i]] = capacities[i]
         graph_costs[start_nodes[i]][end_nodes[i]] = costs[i]
 
     min_cost_max_flow = MinCostMaxFlow(graph_capacities, graph_costs)
-
-    print(f"Max flow {min_cost_max_flow.minCost(s, t)}")
+    max_flow, min_cost, min_cut = min_cost_max_flow.minCostMaxFlow(s, t)
+    print(f"Max flow {max_flow}, min cost {min_cost}, min cut {min_cut}")
