@@ -157,12 +157,11 @@ class MinCostMaxFlow(object):
                     print(f"u = {u}, v = {v}")
                     self.capacities[u][v] -= path_flow
 
-                else:
-                    self.capacities[v][u] = 0
+                # else:
+                #     self.capacities[v][u] = 0
                     # self.g[v][u] = -1
 
                 if self.capacities[u][v] == 0:
-                    # self.g[u][v] = -1
                     min_cut.append([u, v])
             shortest_path = self.bellmanFord(src, dst)
         mc2 = []
