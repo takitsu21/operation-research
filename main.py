@@ -1,160 +1,291 @@
 
-# Python3 program to implement
-# the above approach
-from typing import List
 
-INF = float("inf")
+import enum
+from tracemalloc import start
+
+
+class MaxFlow:
+
+    def __init__(self, capacities):
+        self.graph = capacities
+        self.row = len(capacities)
+        self.parent = [0] * self.row
+
+    def BFS(self, src, dst):
+        visited = [False] * self.row
+
+        queue = []
+
+        queue.append(src)
+        visited[src] = True
+
+        while queue:
+
+            u = queue.pop(0)
+            for ind, val in enumerate(self.graph[u]):
+                if visited[ind] == False and val > 0:
+                    queue.append(ind)
+                    visited[ind] = True
+                    self.parent[ind] = u
+                    if ind == dst:
+                        return True
+        return False
+
+    def findMaxFlow(self, src, dst):
+        max_flow = 0
+
+        while self.BFS(src, dst):
+            path_flow = float("Inf")
+            s = dst
+            while(s != src):
+                path_flow = min(path_flow, self.graph[self.parent[s]][s])
+                s = self.parent[s]
+
+            max_flow += path_flow
+
+            v = dst
+            while(v != src):
+                u = self.parent[v]
+                self.graph[u][v] -= path_flow
+                self.graph[v][u] += path_flow
+                v = self.parent[v]
+
+        return max_flow
+
+
+class Edge:
+    def __init__(self, u, v, cost, capacity) -> None:
+        self.u = u
+        self.v = v
+        self.cost = cost
+        self.capacity = capacity
+        self.distance = float("inf")
+
+    def __repr__(self) -> str:
+        return f"<u: {self.u} v: {self.v} cost: {self.cost} capacity: {self.capacity}>"
+
 
 class MinCostMaxFlow(object):
-    def __init__(self, capacities, cost) -> None:
-        # Stores the self.found edges
-
-        # Stores the number of nodes
-
-        # Stores the capacity
-        # of each edge
+    def __init__(self, start_nodes: list, end_nodes: list, capacities, cost) -> None:
         self.capacities = capacities
-
-        # Stores the self.cost per
-        # unit self.flow of each edge
         self.cost = cost
+        self.start_nodes = start_nodes
+        self.end_nodes = end_nodes
+        self.N = len(self.cost)
+        self.infinity = float("inf")
+        self.distance = [self.infinity] * (self.N)
+        self.parent = [None] * (self.N)
 
-        # Stores the distance from each node
-        # and picked edges for each node
-        self.N = len(self.capacities)
-        self.found = [False for _ in range(self.N)]
-        self.flow = [[0 for _ in range(self.N)]
-                     for _ in range(self.N)]
-        self.dist = [INF for _ in range(self.N + 1)]
-        self.parent = [0 for _ in range(self.N)]
-        self.pi = [0 for _ in range(self.N)]
+    def BFS(self, s, t):
+        visited = [False] * self.N
 
-    # Function to check if it is possible to
-    # have a self.flow from the src to sink
+        queue = []
+        queue.append(s)
+        print(f"{s} -> {t}")
+        visited[s] = True
+        parent = [None] * self.N
+        if s == t:
+            return True
+        while queue:
+            u = queue.pop(0)
+            # print("BFS ", u)
+            for i, capacity in enumerate(self.capacities[u]):
+                if visited[i] == False and capacity != 0:
+                    queue.append(i)
+                    visited[i] = True
+                    parent[i] = u
+                    if i == t:
+                        return True
 
-    def search(self, src: int, sink: int) -> bool:
+        return False
 
-        # Initialise self.found[] to false
-        self.found = [False for _ in range(self.N)]
+    def bellmanFord(self, src, dst):
+        self.distance = [self.infinity] * (self.N)
+        self.distance[src] = 0
+        self.parent = [None for _ in range(self.N)]
+        shortest_path = []
+        for _ in range(self.N - 1):
+            for i in range(self.N):
+                for j in range(self.N):
+                    tmp_dist = self.distance[i] + (self.cost[i][j])
+                    if self.distance[j] > tmp_dist and self.capacities[i][j] != 0:
+                        self.distance[j] = tmp_dist
+                        self.parent[j] = i
 
-        # Initialise the self.dist[] to INF
-        self.dist = [INF for _ in range(self.N + 1)]
+        for i in range(self.N):
+            for j in range(self.N):
+                tmp_dist = self.distance[i] + (self.cost[i][j])
+                if self.distance[j] > tmp_dist and self.capacities[i][j] != 0:
+                    print("Cycle négatif")
+                    return shortest_path
 
-        # Distance from the source node
-        self.dist[src] = 0
+        shortest_path = self.createShortestPath(src, dst)
 
-        # Iterate until src reaches N
-        while (src != self.N):
-            best = self.N
-            self.found[src] = True
+        return shortest_path
 
-            for k in range(self.N):
+    def createShortestPath(self, src, dst):
+        shortest_path = []
+        s = dst
+        while s != src:
+            if self.parent[s] is None:
+                return False
+            shortest_path.insert(0, s)
+            s = self.parent[s]
+        shortest_path.insert(0, s)
+        return shortest_path
 
-                # If already self.found
-                if (self.found[k]):
-                    continue
+    def minCost(self, src, dst):
+        max_flow = 0
+        min_cost = 0
+        min_cut = []
+        shortest_path = self.bellmanFord(src, dst)
 
-                # Evaluate while self.flow
-                # is still in supply
-                if (self.flow[k][src] != 0):
+        while shortest_path and shortest_path[-1] == dst:
 
-                    # Obtain the total value
-                    val = (self.dist[src] + self.pi[src] -
-                           self.pi[k] - self.cost[k][src])
+            path_flow = float("inf")
+            for s in range(len(shortest_path) - 1):
+                u = shortest_path[s]
+                v = shortest_path[s+1]
+                path_flow = min(path_flow, self.capacities[u][v])
 
-                    # If self.dist[k] is > minimum value
-                    if (self.dist[k] > val):
-
-                        # Update
-                        self.dist[k] = val
-                        self.parent[k] = src
-
-                if (self.flow[src][k] < self.capacities[src][k]):
-                    val = (self.dist[src] + self.pi[src] -
-                           self.pi[k] + self.cost[src][k])
-
-                    # If self.dist[k] is > minimum value
-                    if (self.dist[k] > val):
-
-                        # Update
-                        self.dist[k] = val
-                        self.parent[k] = src
-
-                if (self.dist[k] < self.dist[best]):
-                    best = k
-
-            # Update src to best for
-            # next iteration
-            src = best
-
-        for k in range(self.N):
-            self.pi[k] = min(self.pi[k] + self.dist[k], INF)
-        print(self.parent, self.dist)
-        # Return the value obtained at sink
-        return self.found[sink]
-
-    # Function to obtain the maximum Flow
-    def getMaxFlow(self, src: int, sink: int) -> List[int]:
-
-        # global self.capacities, self.cost, self.found, self.dist, self.pi, N, self.flow, self.dad
-
-        totflow = 0
-        totcost = 0
-
-        # If a path exist from src to sink
-        while (self.search(src, sink)):
-            print(src, sink)
-            # Set the default amount
-            amount = INF
-            dst = sink
-
-            while dst != src:
-                amount = min(
-                    amount, self.flow[dst][self.parent[dst]] if
-                    (self.flow[dst][self.parent[dst]] != 0) else
-                    self.capacities[self.parent[dst]][dst] - self.flow[self.parent[dst]][dst])
-                dst = self.parent[dst]
-
-            dst = sink
-
-            while dst != src:
-                if (self.flow[dst][self.parent[dst]] != 0):
-                    self.flow[dst][self.parent[dst]] -= amount
-                    totcost -= amount * \
-                        self.cost[dst][self.parent[dst]]
+            max_flow += path_flow
+            for s in range(len(shortest_path) - 1):
+                u = shortest_path[s]
+                v = shortest_path[s+1]
+                if self.capacities[u][v] != 0:
+                    min_cost += path_flow * self.cost[u][v]
+                    print(f"u = {u}, v = {v}")
+                    self.capacities[u][v] -= path_flow
 
                 else:
-                    self.flow[self.parent[dst]][dst] += amount
-                    totcost += amount * \
-                        self.cost[self.parent[dst]][dst]
+                    self.capacities[v][u] = 0
+                    # self.g[v][u] = -1
 
-                dst = self.parent[dst]
+                if self.capacities[u][v] == 0:
+                    # self.g[u][v] = -1
+                    min_cut.append([u, v])
+            shortest_path = self.bellmanFord(src, dst)
+        mc2 = []
+        # visited = self.BFS(src, dst)
+        visited = self.N * [False]
 
-            totflow += amount
+        # print(mc2)
+        print(min_cut)
+        for u, v in min_cut:
+            print(not self.BFS(src, v), self.BFS(src, u), v, u)
+            if not self.BFS(src, v) and self.BFS(src, u):
+                mc2.append([u, v])
+        # print(self.g)
+        return max_flow, min_cost, mc2
 
-        # Return pair total self.cost and sink
-        return [totflow, totcost]
 
-# Driver Code
 if __name__ == "__main__":
 
-    s = 0
-    t = 4
+    # start_nodes = [0, 0, 1, 2, 3, 1, 2, 3, 4, 5]
+    # end_nodes = [1, 3, 2, 3, 2, 4, 4, 5, 6, 6]
+    # capacities = [16, 13, 5, 5, 10, 10, 8, 15, 25, 6]
+    # costs = [6, 4, 5, 6, 6, 5, 3, 5, 7, 7]
+    # s = 0
+    # t = 6
+    # start_nodes = [ 0, 0,  1, 1,  1,  2, 2,  3, 4]
+    # end_nodes   = [ 1, 2,  2, 3,  4,  3, 4,  4, 2]
+    # capacities  = [15, 8, 20, 4, 10, 15, 4, 20, 5]
+    # costs  = [ 4, 4,  2, 2,  6,  1, 3,  2, 3]
 
-    capacities = [[0, 15, 8, 0, 0],
-                  [0, 0, 20, 4, 10],
-                  [0, 0, 0, 15, 4],
-                  [0, 0, 0, 0, 20],
-                  [0, 0, 5, 0, 0]]
+    # start_nodes = [0, 0, 0, 1, 1, 2, 3]
+    # end_nodes =   [1, 2, 4, 2, 3, 4, 4]
+    # capacities =  [3, 4, 3, 2, 0, 6, 2]
+    # costs =       [3, 4, 30, 2, 2, 6, 2]
+    # s = 0
+    # t = 4
 
-    cost = [[0, 4, 4, 0, 0],
-            [0, 0, 2, 2, 6],
-            [0, 0, 0, 1, 3],
-            [0, 0, 0, 0, 2],
-            [0, 0, 3, 0, 0]]
+    # start_nodes = [ 0, 0,  1, 1,  1,  2, 2,  3, 4]
+    # end_nodes   = [ 1, 2,  2, 3,  4,  3, 4,  4, 2]
+    # capacities  = [15, 8, 20, 4, 10, 15, 4, 20, 5]
+    # costs  = [ 4, 4,  2, 2,  6,  1, 3,  2, 3]
+    # s = 0
+    # t = 4
 
-    minCostMaxFlow = MinCostMaxFlow(capacities, cost)
+    # start_nodes = [0, 0, 2]
+    # end_nodes = [1, 2, 3]
+    # capacities = [2, 2, 2]
+    # costs = [2, 2, 2]
+    # s = 0
+    # t = 3
+    # start_nodes = [0, 1, 2]
+    # end_nodes = [1, 2, 3]
+    # capacities = [4, 5, 4]
+    # costs = [2, 1, 1]
+    # s = 0
+    # t = 3
 
-    flow, cost = minCostMaxFlow.getMaxFlow(s, t)
+    start_nodes = [0, 0, 2]
+    end_nodes = [1, 2, 3]
+    capacities = [2, 2, 2]
+    costs = [2, 2, 2]
+    s=0
+    t=3
 
-    print("Max flow : {}, Min cost : {}".format(flow, cost))
+    # start_nodes = [0, 0, 1, 2, 3, 1, 2, 3, 4, 5]
+    # end_nodes   = [1, 3, 2, 3, 2, 4, 4, 5, 6, 6]
+    # capacities  = [16,13,5, 5,10,10, 8,15,25, 6]
+    # costs       = [6, 4, 5, 6, 6, 5, 3, 5, 7, 7]
+    # s = 0
+    # t = 6
+
+    # start_nodes = [0, 1, 2, 1]
+    # end_nodes = [1, 2, 0, 3]
+    # capacities = [2, 2, 2, 2]
+    # costs = [1, 1, -3, 1]
+    # s = 0
+    # t = 3
+
+    # start_nodes = [0, 1, 2, 1]
+    # end_nodes = [1, 2, 0, 3]
+    # capacities = [2, 2, 2, 2]
+    # costs = [1, 1, -2, 1]
+
+    # start_nodes = [ 0, 0,  1, 1,  1,  2, 2,  3, 4]
+    # end_nodes   = [ 1, 2,  2, 3,  4,  3, 4,  4, 2]
+    # capacities  = [15, 8, 20, 4, 10, 15, 4, 20, 5]
+    # costs  = [ 4, 4,  2, 2,  6,  1, 3,  2, 3]
+    # s = 0
+    # t = 4
+
+    # start_nodes = [0, 1, 2]
+    # end_nodes = [1, 2, 3]
+    # capacities = [4, 5, 4]
+    # costs = [2, 1, 1]
+    # s = 0
+    # t = 3
+
+    # start_nodes = [0, 0, 0, 1, 1, 2, 3]
+    # end_nodes = [1, 2, 4, 2, 3, 4, 4]
+    # capacities = [3, 4, 3, 2, 0, 6, 2]
+    # costs = [3, 4, 30, 2, 2, 6, 2]
+    # s = 0
+    # t = 4
+
+    base_nb_nodes = max(max(start_nodes), max(end_nodes)) + 1
+    nb_nodes = base_nb_nodes - 1
+
+    if len(start_nodes) > nb_nodes:
+        nb_nodes = len(start_nodes)
+
+    graph_capacities = [
+        [0 for x in range(base_nb_nodes)] for z in range(base_nb_nodes)
+    ]
+
+    graph_costs = [
+        [0 for x in range(base_nb_nodes)] for z in range(base_nb_nodes)
+    ]
+
+
+    for i in range(nb_nodes):
+        graph_capacities[start_nodes[i]][end_nodes[i]] = capacities[i]
+        graph_costs[start_nodes[i]][end_nodes[i]] = costs[i]
+
+    min_cost_max_flow = MinCostMaxFlow(
+        start_nodes, end_nodes, graph_capacities, graph_costs)
+
+    print(f"Max flow {min_cost_max_flow.minCost(s, t)}")
