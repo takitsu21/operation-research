@@ -1,4 +1,7 @@
 
+import os
+
+
 class MaxFlow(object):
 
     def __init__(self, capacities):
@@ -150,12 +153,20 @@ class MinCostMaxFlow(object):
 
             shortest_path = self.bellmanFord(src, dst)
         min_cut = []
-
+        arc_to_link_dot = []
         for u, v in saturated_flow_mc:
             if self.BFS(src, u) and not self.BFS(src, v):
                 min_cut.append([u, v])
+            else:
+                arc_to_link_dot.append([u, v])
 
         self.pprintResult(max_flow, min_cost, min_cut)
+        try:
+            filename = "graph"
+            self.createDotFile(f"{filename}.dot", min_cut, src, dst, arc_to_link_dot, max_flow)
+            self.generateDotPdf(filename)
+        except:
+            pass
         return max_flow, min_cost, min_cut
 
     def pprintResult(self, max_flow: int, min_cost: int, min_cut: list):
@@ -163,6 +174,35 @@ class MinCostMaxFlow(object):
         for u, v in min_cut:
             ret += f"| ({u} -> {v}) | "
         print(ret)
+
+
+    def createDotFile(self, file, min_cut: list, src: int, dst: int, arc_to_link_dot, max_flow: int):
+        text = """digraph G {
+    graph [nodesep="0.3", ranksep="0.3",fontsize=12]
+    node [shape=circle,fixedsize=true,width=.3,height=.3,fontsize=12]
+    edge [arrowsize=0.6]
+"""
+        text += f'\ts -> {src}\n'
+        for i in range(self.N):
+            for j in range(self.N):
+                if self.capacities[i][j] != 0:
+                    text += f'\t{i} -> {j} [label=<<font color="darkgreen">{self.capacities[i][j]}</font>,<font color="red">{self.cost[i][j]}</font>>]\n'
+                elif [i, j] in arc_to_link_dot:
+                    text += f'\t{i} -> {j} [color=orange, label=<<font color="orange">saturated</font>>]\n'
+        for u, v in min_cut:
+            text += f'\t{u} -> {v} [color=red, label=<<font color="red">cut</font>>]\n'
+
+        text += f'\t{dst} -> t \n'
+        text += f'\tt -> s [color=blue label=<<font color="blue">max flow = {max_flow}</font>>]\n'
+        text += "\ts [color=green]\n\tt [color=blue]\n"
+        text += "}"
+        with open(file, "w+") as f:
+            f.write(text)
+        print(f"{file} a été créer...")
+
+    def generateDotPdf(self, filename):
+        os.system(f"dot -Tpdf {filename}.dot -o {filename}.pdf")
+        print(f"{filename}.pdf a été généré...")
 
 if __name__ == "__main__":
 
@@ -172,6 +212,7 @@ if __name__ == "__main__":
     costs = [6, 4, 5, 6, 6, 5, 3, 5, 7, 7]
     s = 0
     t = 6
+
     # start_nodes = [ 0, 0,  1, 1,  1,  2, 2,  3, 4]
     # end_nodes   = [ 1, 2,  2, 3,  4,  3, 4,  4, 2]
     # capacities  = [15, 8, 20, 4, 10, 15, 4, 20, 5]
@@ -197,6 +238,7 @@ if __name__ == "__main__":
     # costs = [2, 2, 2]
     # s = 0
     # t = 3
+
     # start_nodes = [0, 1, 2]
     # end_nodes = [1, 2, 3]
     # capacities = [4, 5, 4]
@@ -253,7 +295,6 @@ if __name__ == "__main__":
 
     base_nb_nodes = max(max(start_nodes), max(end_nodes)) + 1
     nb_nodes = base_nb_nodes - 1
-
     if len(start_nodes) > nb_nodes:
         nb_nodes = len(start_nodes)
 

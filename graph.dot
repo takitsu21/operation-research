@@ -1,0 +1,20 @@
+digraph G {
+    graph [nodesep="0.3", ranksep="0.3",fontsize=12]
+    node [shape=circle,fixedsize=true,width=.3,height=.3,fontsize=12]
+    edge [arrowsize=0.6]
+	s -> 0
+	0 -> 1 [label=<<font color="darkgreen">5</font>,<font color="red">6</font>>]
+	0 -> 3 [color=orange, label=<<font color="orange">saturated</font>>]
+	1 -> 2 [label=<<font color="darkgreen">4</font>,<font color="red">5</font>>]
+	2 -> 3 [label=<<font color="darkgreen">5</font>,<font color="red">6</font>>]
+	3 -> 2 [label=<<font color="darkgreen">3</font>,<font color="red">6</font>>]
+	3 -> 5 [label=<<font color="darkgreen">9</font>,<font color="red">5</font>>]
+	4 -> 6 [label=<<font color="darkgreen">7</font>,<font color="red">7</font>>]
+	5 -> 6 [color=red, label=<<font color="red">cut</font>>]
+	1 -> 4 [color=red, label=<<font color="red">cut</font>>]
+	2 -> 4 [color=red, label=<<font color="red">cut</font>>]
+	6 -> t 
+	t -> s [color=blue label=<<font color="blue">max flow = 24</font>>]
+	s [color=green]
+	t [color=blue]
+}
