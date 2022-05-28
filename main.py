@@ -78,7 +78,7 @@ class MinCostMaxFlow(object):
         return False
 
     # renvoie le plus court chemin entre src et dst et détecte les cycles négatifs
-    def bellmanFord(self, src, dst):
+    def bellmanFord(self, src: int, dst: int):
         self.distance = [self.infinity] * (self.N)
         self.distance[src] = 0
         self.parent = [None for _ in range(self.N)]
@@ -105,7 +105,7 @@ class MinCostMaxFlow(object):
         return shortest_path
 
     # créer le shortest path depuis les parents
-    def createShortestPath(self, src, dst):
+    def createShortestPath(self, src: int, dst: int):
         shortest_path = []
         s = dst
         while s != src:
@@ -116,7 +116,7 @@ class MinCostMaxFlow(object):
         shortest_path.insert(0, s)
         return shortest_path
 
-    def minCostMaxFlow(self, src, dst):
+    def minCostMaxFlow(self, src: int, dst: int):
         max_flow = 0
         min_cost = 0
         saturated_flow_mc = []
@@ -155,8 +155,14 @@ class MinCostMaxFlow(object):
             if self.BFS(src, u) and not self.BFS(src, v):
                 min_cut.append([u, v])
 
+        self.pprintResult(max_flow, min_cost, min_cut)
         return max_flow, min_cost, min_cut
 
+    def pprintResult(self, max_flow: int, min_cost: int, min_cut: list):
+        ret = f"Max flow: {max_flow}\nMin cost: {min_cost}\nMin cut "
+        for u, v in min_cut:
+            ret += f"| ({u} -> {v}) | "
+        print(ret)
 
 if __name__ == "__main__":
 
@@ -264,5 +270,6 @@ if __name__ == "__main__":
         graph_costs[start_nodes[i]][end_nodes[i]] = costs[i]
 
     min_cost_max_flow = MinCostMaxFlow(graph_capacities, graph_costs)
-    max_flow, min_cost, min_cut = min_cost_max_flow.minCostMaxFlow(s, t)
-    print(f"Max flow {max_flow}, min cost {min_cost}, min cut {min_cut}")
+    # max_flow, min_cost, min_cut = min_cost_max_flow.minCostMaxFlow(s, t)
+    min_cost_max_flow.minCostMaxFlow(s, t)
+    # print(f"Max flow {max_flow}, min cost {min_cost}, min cut {min_cut}")
