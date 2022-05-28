@@ -123,7 +123,8 @@ class MinCostMaxFlow(object):
         max_flow = 0
         min_cost = 0
         saturated_flow_mc = []
-
+        min_cut = []
+        arc_to_link_dot = []
         shortest_path = self.bellmanFord(src, dst)
 
         # tant que le chemin n'est pas vide et qu'il existe un chemin vers dst
@@ -152,8 +153,7 @@ class MinCostMaxFlow(object):
                     saturated_flow_mc.append([u, v])
 
             shortest_path = self.bellmanFord(src, dst)
-        min_cut = []
-        arc_to_link_dot = []
+
         for u, v in saturated_flow_mc:
             if self.BFS(src, u) and not self.BFS(src, v):
                 min_cut.append([u, v])
