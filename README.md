@@ -1,14 +1,12 @@
 # Introduction
 
 ## Problème de flot maximum
-Le problème de flot maximum consiste à trouver, dans un réseau de flot, un flot réalisable
-depuis une source unique et vers un puits unique qui soit maximum.
+Le problème de flot maximum consiste à trouver, dans un réseau de flot, un flot réalisable depuis une source unique et vers un puits unique qui soit maximum.
 
 ## Problème du flot de coût minimum
 
 Le problème du flot de coût minimum consiste à trouver la manière la plus économe d'utiliser
-un réseau de transport tout en satisfaisant les contraintes de production et de demande des
-nœuds du réseau.
+un réseau de transport tout en satisfaisant les contraintes de production et de demande des nœuds du réseau.
 
 # Flot maximum
 
@@ -24,17 +22,19 @@ Dans le graphe ci-dessous nous pouvons voir un exemple applicatif de l'algo qui 
 nœud 1 au nœud 6.
 On peut dire que le flot maximum est la somme du flot de la coupe minimum qui dans notre
 cas est 0 → 2, 0 → 1 donc 15 + 8 = 23, ce graphe à un flot maximum de 23.
-3
 
-![graph-example](./img/graph.png)
+![graph-example](./img/max-flow.png)
 
 # Flot maximum de coût minimum
+
 Pour le problème du flot de coût minimum le principe est presque le même, a la place d'utiliser
 BFS nous utilisons un algorithme de plus court chemin nommé Bellman-Ford qui permet de
 détecter les cycles négatifs. Le principe est le suivant : tant qu'il existe un plus court chemin de
 s a t, on cherche le flot minimum du chemin et on l'ajoute au flot maximum. Ensuite on met a
 jour les capacités de flot et on rajoute le coût de l'arête fois le flot minimal du plus court chemin
 actuel.
+
+![graph-min-cost](./img/min-cost-max-flow.png)
 
 # Coupe minimum
 
