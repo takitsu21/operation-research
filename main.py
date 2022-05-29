@@ -147,6 +147,10 @@ class MinCostMaxFlow(object):
                     min_cost += path_flow * self.cost[u][v]
                     self.capacities[u][v] -= path_flow
 
+                    # on ajoute les arcs de retour
+                    self.capacities[v][u] += path_flow
+                    self.cost[v][u] = -self.cost[u][v]
+
                 # si le flot est saturé
                 if self.capacities[u][v] == 0:
                     # self.capacities[v][u] = 0
@@ -173,7 +177,9 @@ class MinCostMaxFlow(object):
         ret = f"Max flow: {max_flow}\nMin cost: {min_cost}\nMin cut "
         for u, v in min_cut:
             ret += f"| ({u} -> {v}) | "
+        ret += f"\nGraph residuel: {self.capacities}"
         print(ret)
+
 
 
     def createDotFile(self, file, min_cut: list, src: int, dst: int, arc_to_link_dot, max_flow: int):
@@ -188,7 +194,7 @@ class MinCostMaxFlow(object):
                 if self.capacities[i][j] != 0:
                     text += f'\t{i} -> {j} [label=<<font color="darkgreen">{self.capacities[i][j]}</font>,<font color="red">{self.cost[i][j]}</font>>]\n'
                 elif [i, j] in arc_to_link_dot:
-                    text += f'\t{i} -> {j} [color=orange, label=<<font color="orange">saturated</font>>]\n'
+                    text += f'\t{i} -> {j} [color=orange, label=<<font color="orange">saturated</font>, <font color="red">{self.cost[i][j]}</font>>]\n'
         for u, v in min_cut:
             text += f'\t{u} -> {v} [color=red, label=<<font color="red">cut</font>>]\n'
 
@@ -213,13 +219,13 @@ if __name__ == "__main__":
     # s = 0
     # t = 6
 
-    start_nodes = [ 0, 0,  1, 1,  1,  2, 2,  3, 4]
-    end_nodes   = [ 1, 2,  2, 3,  4,  3, 4,  4, 2]
-    capacities  = [15, 8, 20, 4, 10, 15, 4, 20, 5]
-    costs  = [ 4, 4,  2, 2,  6,  1, 3,  2, 3]
-    # costs  = [ 0, 0,  0, 0,  0,  0, 0, 0, 0]
-    s = 0
-    t = 4
+    # start_nodes = [ 0, 0,  1, 1,  1,  2, 2,  3, 4]
+    # end_nodes   = [ 1, 2,  2, 3,  4,  3, 4,  4, 2]
+    # capacities  = [15, 8, 20, 4, 10, 15, 4, 20, 5]
+    # costs  = [ 4, 4,  2, 2,  6,  1, 3,  2, 3]
+    # # costs  = [ 0, 0,  0, 0,  0,  0, 0, 0, 0]
+    # s = 0
+    # t = 4
 
     # start_nodes = [0, 0, 0, 1, 1, 2, 3]
     # end_nodes =   [1, 2, 4, 2, 3, 4, 4]
@@ -296,6 +302,13 @@ if __name__ == "__main__":
     # s = 0
     # t = 4
 
+    start_nodes = [ 0 , 1 , 1 , 1 , 2 , 2 , 2 , 2 , 3 , 3 , 4 , 4 ,5 ]
+    end_nodes   = [ 1 , 2 , 3 , 4 , 3,  5 , 6 , 4 , 4 , 5 , 5 , 6, 6 ]
+    capacities  = [ 40, 15,  8,  5, 20, 10, 12, 4, 15, 4, 20 , 5, 15 ]
+    costs       = [ 2 ,  4 , 4 , 8 , 2, 6 , 8 , 2 , 1 , 3 , 2 , 1 , 8]
+    s = 0
+    t = 6
+
     base_nb_nodes = max(max(start_nodes), max(end_nodes)) + 1
     nb_nodes = base_nb_nodes - 1
     if len(start_nodes) > nb_nodes:
@@ -314,6 +327,4 @@ if __name__ == "__main__":
         graph_costs[start_nodes[i]][end_nodes[i]] = costs[i]
 
     min_cost_max_flow = MinCostMaxFlow(graph_capacities, graph_costs)
-    # max_flow, min_cost, min_cut = min_cost_max_flow.minCostMaxFlow(s, t)
     min_cost_max_flow.minCostMaxFlow(s, t)
-    # print(f"Max flow {max_flow}, min cost {min_cost}, min cut {min_cut}")
