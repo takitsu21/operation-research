@@ -166,99 +166,10 @@ class MinCostMaxFlow(object):
         print(f"{filename}.pdf a été généré...")
 
 if __name__ == "__main__":
-
-    start_nodes = [0, 0, 1, 2, 3, 1, 2, 3, 4, 5]
-    end_nodes = [1, 3, 2, 3, 2, 4, 4, 5, 6, 6]
-    capacities = [16, 13, 5, 5, 10, 10, 8, 15, 25, 6]
-    costs = [6, 4, 5, 6, 6, 5, 3, 5, 7, 7]
-    s = 0
-    t = 6
-
-    start_nodes = [ 0, 0,  1, 1,  1,  2, 2,  3, 4]
-    end_nodes   = [ 1, 2,  2, 3,  4,  3, 4,  4, 2]
-    capacities  = [15, 8, 20, 4, 10, 15, 4, 20, 5]
-    costs  = [ 4, 4,  2, 2,  6,  1, 3,  2, 3]
-    # costs  = [ 0, 0,  0, 0,  0,  0, 0, 0, 0]
-    s = 0
-    t = 4
-
-    # start_nodes = [0, 0, 0, 1, 1, 2, 3]
-    # end_nodes =   [1, 2, 4, 2, 3, 4, 4]
-    # capacities =  [3, 4, 3, 2, 0, 6, 2]
-    # costs =       [3, 4, 30, 2, 2, 6, 2]
-    # s = 0
-    # t = 4
-
-    # start_nodes = [ 0, 0,  1, 1,  1,  2, 2,  3, 4]
-    # end_nodes   = [ 1, 2,  2, 3,  4,  3, 4,  4, 2]
-    # capacities  = [15, 8, 20, 4, 10, 15, 4, 20, 5]
-    # costs  = [ 4, 4,  2, 2,  6,  1, 3,  2, 3]
-    # s = 0
-    # t = 4
-
-    # start_nodes = [0, 0, 2]
-    # end_nodes = [1, 2, 3]
-    # capacities = [2, 2, 2]
-    # costs = [2, 2, 2]
-    # s = 0
-    # t = 3
-
-    # start_nodes = [0, 1, 2]
-    # end_nodes = [1, 2, 3]
-    # capacities = [4, 5, 4]
-    # costs = [2, 1, 1]
-    # s = 0
-    # t = 3
-
-    # start_nodes = [0, 0, 2]
-    # end_nodes = [1, 2, 3]
-    # capacities = [2, 2, 2]
-    # costs = [2, 2, 2]
-    # s=0
-    # t=3
-
-    # start_nodes = [0, 0, 1, 2, 3, 1, 2, 3, 4, 5]
-    # end_nodes   = [1, 3, 2, 3, 2, 4, 4, 5, 6, 6]
-    # capacities  = [16,13,5, 5,10,10, 8,15,25, 6]
-    # costs       = [6, 4, 5, 6, 6, 5, 3, 5, 7, 7]
-    # s = 0
-    # t = 6
-
-    # start_nodes = [0, 1, 2, 1]
-    # end_nodes = [1, 2, 0, 3]
-    # capacities = [2, 2, 2, 2]
-    # costs = [1, 1, -3, 1]
-    # s = 0
-    # t = 3
-
-    # start_nodes = [0, 1, 2, 1]
-    # end_nodes = [1, 2, 0, 3]
-    # capacities = [2, 2, 2, 2]
-    # costs = [1, 1, -2, 1]
-
-    # start_nodes = [ 0, 0,  1, 1,  1,  2, 2,  3, 4]
-    # end_nodes   = [ 1, 2,  2, 3,  4,  3, 4,  4, 2]
-    # capacities  = [15, 8, 20, 4, 10, 15, 4, 20, 5]
-    # costs  = [ 4, 4,  2, 2,  6,  1, 3,  2, 3]
-    # s = 0
-    # t = 4
-
-    # start_nodes = [0, 1, 2]
-    # end_nodes = [1, 2, 3]
-    # capacities = [4, 5, 4]
-    # costs = [2, 1, 1]
-    # s = 0
-    # t = 3
-
-    # start_nodes = [0, 0, 0, 1, 1, 2, 3]
-    # end_nodes = [1, 2, 4, 2, 3, 4, 4]
-    # capacities = [3, 4, 3, 2, 0, 6, 2]
-    # costs = [3, 4, 30, 2, 2, 6, 2]3
     start_nodes = [ 0 , 1 , 1 , 1 , 2 , 2 , 2 , 2 , 3 , 3 , 4 , 4 ,5 ]
     end_nodes   = [ 1 , 2 , 3 , 4 , 3,  5 , 6 , 4 , 4 , 5 , 5 , 6, 6 ]
     capacities  = [ 40, 15,  8,  5, 20, 10, 12, 4, 15, 4, 20 , 5, 15 ]
     costs       = [ 2 ,  4 , 4 , 8 , 2, 6 , 8 , 2 , 1 , 3 , 2 , 1 , 8]
-    # costs       = [ 0 ,  0 , 0 , 0 , 0, 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0]
     s = 0
     t = 6
 
