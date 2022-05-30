@@ -1,55 +1,6 @@
 
 import os
 
-
-class MaxFlow(object):
-
-    def __init__(self, capacities):
-        self.capacities = capacities
-        self.N = len(capacities)
-        self.parent = [0] * self.N
-
-    def BFS(self, src, dst):
-        visited = [False] * self.N
-
-        queue = []
-
-        queue.append(src)
-        visited[src] = True
-
-        while queue:
-
-            u = queue.pop(0)
-            for i, val in enumerate(self.capacities[u]):
-                if visited[i] == False and val > 0:
-                    queue.append(i)
-                    visited[i] = True
-                    self.parent[i] = u
-                    if i == dst:
-                        return True
-        return False
-
-    def findMaxFlow(self, src, dst):
-        max_flow = 0
-
-        while self.BFS(src, dst):
-            path_flow = float("Inf")
-            s = dst
-            while(s != src):
-                path_flow = min(path_flow, self.capacities[self.parent[s]][s])
-                s = self.parent[s]
-
-            max_flow += path_flow
-
-            v = dst
-            while(v != src):
-                u = self.parent[v]
-                self.capacities[u][v] -= path_flow
-                self.capacities[v][u] += path_flow
-                v = self.parent[v]
-
-        return max_flow
-
 class MinCostMaxFlow(object):
     def __init__(self, capacities, cost) -> None:
         self.capacities = capacities
@@ -174,10 +125,13 @@ class MinCostMaxFlow(object):
         return max_flow, min_cost, min_cut
 
     def pprintResult(self, max_flow: int, min_cost: int, min_cut: list):
-        ret = f"Max flow: {max_flow}\nMin cost: {min_cost}\nMin cut "
+        ret = f"Max flow: {max_flow}\nMin cost: {min_cost}"
+        ret += "\nAttention le résultat de la min cut diffère du graphe donné de base car il est réadapter pour rajouter s et t\nMin cut "
+
         for u, v in min_cut:
             ret += f"| ({u} -> {v}) | "
-        ret += f"\nGraph residuel: {self.capacities}"
+        ret += f"\nGraph residuel: {self.capacities}\n"
+        ret += f"Graph cost: {self.cost}"
         print(ret)
 
 
@@ -188,7 +142,6 @@ class MinCostMaxFlow(object):
     node [shape=circle,fixedsize=true,width=.3,height=.3,fontsize=12]
     edge [arrowsize=0.6]
 """
-        text += f'\ts -> {src}\n'
         for i in range(self.N):
             for j in range(self.N):
                 if self.capacities[i][j] != 0:
@@ -197,10 +150,12 @@ class MinCostMaxFlow(object):
                     text += f'\t{i} -> {j} [color=orange, label=<<font color="orange">saturated</font>, <font color="red">{self.cost[i][j]}</font>>]\n'
         for u, v in min_cut:
             text += f'\t{u} -> {v} [color=red, label=<<font color="red">cut</font>>]\n'
+        text += f'\t{dst} -> {src} [color=blue label=<<font color="blue">max flow = {max_flow}</font>>]\n'
+        text += f'\t{src} [label="s" color=green]\n\t{dst} [label="t" color=blue]\n'
 
-        text += f'\t{dst} -> t \n'
-        text += f'\tt -> s [color=blue label=<<font color="blue">max flow = {max_flow}</font>>]\n'
-        text += "\ts [color=green]\n\tt [color=blue]\n"
+        for i in range(self.N - 1):
+            if i+1 != src and i+1 != dst:
+                text += f'\t{i+1} [label="{i}"]\n'
         text += "}"
         with open(file, "w+") as f:
             f.write(text)
@@ -212,20 +167,20 @@ class MinCostMaxFlow(object):
 
 if __name__ == "__main__":
 
-    # start_nodes = [0, 0, 1, 2, 3, 1, 2, 3, 4, 5]
-    # end_nodes = [1, 3, 2, 3, 2, 4, 4, 5, 6, 6]
-    # capacities = [16, 13, 5, 5, 10, 10, 8, 15, 25, 6]
-    # costs = [6, 4, 5, 6, 6, 5, 3, 5, 7, 7]
-    # s = 0
-    # t = 6
+    start_nodes = [0, 0, 1, 2, 3, 1, 2, 3, 4, 5]
+    end_nodes = [1, 3, 2, 3, 2, 4, 4, 5, 6, 6]
+    capacities = [16, 13, 5, 5, 10, 10, 8, 15, 25, 6]
+    costs = [6, 4, 5, 6, 6, 5, 3, 5, 7, 7]
+    s = 0
+    t = 6
 
-    # start_nodes = [ 0, 0,  1, 1,  1,  2, 2,  3, 4]
-    # end_nodes   = [ 1, 2,  2, 3,  4,  3, 4,  4, 2]
-    # capacities  = [15, 8, 20, 4, 10, 15, 4, 20, 5]
-    # costs  = [ 4, 4,  2, 2,  6,  1, 3,  2, 3]
-    # # costs  = [ 0, 0,  0, 0,  0,  0, 0, 0, 0]
-    # s = 0
-    # t = 4
+    start_nodes = [ 0, 0,  1, 1,  1,  2, 2,  3, 4]
+    end_nodes   = [ 1, 2,  2, 3,  4,  3, 4,  4, 2]
+    capacities  = [15, 8, 20, 4, 10, 15, 4, 20, 5]
+    costs  = [ 4, 4,  2, 2,  6,  1, 3,  2, 3]
+    # costs  = [ 0, 0,  0, 0,  0,  0, 0, 0, 0]
+    s = 0
+    t = 4
 
     # start_nodes = [0, 0, 0, 1, 1, 2, 3]
     # end_nodes =   [1, 2, 4, 2, 3, 4, 4]
@@ -298,10 +253,7 @@ if __name__ == "__main__":
     # start_nodes = [0, 0, 0, 1, 1, 2, 3]
     # end_nodes = [1, 2, 4, 2, 3, 4, 4]
     # capacities = [3, 4, 3, 2, 0, 6, 2]
-    # costs = [3, 4, 30, 2, 2, 6, 2]
-    # s = 0
-    # t = 4
-
+    # costs = [3, 4, 30, 2, 2, 6, 2]3
     start_nodes = [ 0 , 1 , 1 , 1 , 2 , 2 , 2 , 2 , 3 , 3 , 4 , 4 ,5 ]
     end_nodes   = [ 1 , 2 , 3 , 4 , 3,  5 , 6 , 4 , 4 , 5 , 5 , 6, 6 ]
     capacities  = [ 40, 15,  8,  5, 20, 10, 12, 4, 15, 4, 20 , 5, 15 ]
